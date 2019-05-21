@@ -1,0 +1,1427 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="homepage.css">
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-svg-round-progressbar/0.4.8/roundProgress.min.js"></script>
+
+
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="https://connect.facebook.net/en_US/all.js"></script>
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId: '2226971704285763',
+        xfbml: true,
+        version: 'v2.3'
+      });
+    };
+
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {
+        return;
+      }
+      js = d.createElement(s);
+      js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
+  <script language="javascript">
+    var module1 = angular.module('module1', ['angular-svg-round-progressbar']).constant('MODULE_1', 'module1');
+    var module2 = angular.module('module2', ['ngMaterial']).constant('MODULE_2', 'module2');
+    var ebayApp = angular.module('ebayapp', ['module1', 'module2'])
+
+    module2.controller("roundProgress", function($scope) {
+
+    });
+    module1.controller('autocomplete', autocomplete);
+
+    function autocomplete($timeout, $q, $log) {
+      var self = this;
+      self.isDisabled = false;
+
+      // list of states to be displayed
+      self.querySearch = queryforZipCodes;
+
+      function queryforZipCodes(query) {
+        var results = [],
+          deferred;
+        deferred = $q.defer();
+        deferred.notify();
+        $.ajax({
+          url: 'http://csci571-mukund-hw8.us-east-2.elasticbeanstalk.com/getZipCodes',
+          type: 'GET',
+          contentType: "application/json",
+          data: {
+            postalCode: query
+          },
+          success: function(results) {
+            if (results.length > 0) {
+              var res = "";
+              var res = '';
+              for (var i = 0; i < results.length; i++) {
+                if (i != 0) {
+                  res += ', '
+                }
+                res += results[i];
+              }
+              deferred.resolve(loadZipCodes(res));
+            }
+          }
+        });
+        return deferred.promise;
+      }
+
+      //build list of states as map of key-value pairs
+      function loadZipCodes(allZipCodes) {
+        return allZipCodes.split(/, +/g).map(function(zipcode) {
+          return {
+            value: zipcode.toLowerCase(),
+            display: zipcode
+          };
+        });
+      }
+    }
+  </script>
+
+  <script type="text/javascript">
+    function getCurrentLocation() {
+      $.ajax({
+        url: 'http://ip-api.com/json',
+        type: 'GET',
+        crossDomain: true,
+        dataType: 'jsonp',
+        contentType: "application/json",
+        success: function(results) {
+          setCurrentLocation(results);
+        }
+      });
+    }
+
+
+    function setCurrentLocation(results) {
+      document.getElementById("zipcode_here").value = results.zip;
+    }
+
+    var data = [];
+
+    function truncate(string) {
+      if (string.length > 35) {
+        var truncatedString = string.substring(0, 35);
+        return truncatedString = truncatedString.substr(0, Math.min(truncatedString.length, truncatedString.lastIndexOf(" "))) + '...';
+      } else
+        return string;
+    }
+
+    function firstPageReults(results) {
+      document.getElementById('wish_main_div').style.display = "none";
+      document.getElementById('product_details_div_result').style.display = "none";
+      document.getElementById('result_main_div').style.display = "block";
+      document.getElementById('results').style.display = "block";
+      var content = '';
+      document.getElementById('results').innerHTML = content;
+
+      if (results.length != 0) {
+        document.getElementById('display_forward_button_result').style.display = "block";
+        document.getElementById('display_forward_button_result').disabled = true;
+        data = results;
+        innerHTML =
+          "<table class='table table-striped table-dark'> <thead> <tr> <th>#</th><th>Image</th>  <th> Title </th>  <th> Price  </th> <th>Shipping</th>  <th>  Zip </th>  <th> Seller  </th>  <th> Wish List  </th>   </tr> </thead><tbody>";
+        for (var j = 0; j < data.length && j < 10; j++) {
+          innerHTML += "<tr id=row_" + data[j].itemId + ">";
+          innerHTML += "<td style='text-align:left'> " + data[j].index + "</td>";
+          if (data[j].image != "N/A") {
+            innerHTML += "<td><a href='" +data[j].image + "' target='_blank'><img style='padding:5px 5px 5px 5px;' height = '75px' width ='75px' src = '" + data[j].image + "'/></a></td>";
+          } else {
+            innerHTML += "<td style='text-align:left'> N/A </td>";
+          }
+          var title_temp = data[j].title;
+          innerHTML += "<td style='text-align:left;' class='tooltip_class'><form action='' method='post'> <a data-toggle='tooltip' data-placement='bottom' title = '" + data[j].title + "' href='javascript:void(0)' onclick=getDetails('" + data[j]
+            .itemId + "')>" + truncate(
+              title_temp) + "</a>";
+          innerHTML += '</td>';
+          innerHTML += "<td style='text-align:left;'>$" + data[j].price + "</td>";
+          innerHTML += "<td style='text-align:left;'> " + data[j].shipping + "</td>";
+          innerHTML += "<td style='text-align:left;'> " + data[j].zipcode + "</td>";
+          innerHTML += "<td style='text-align:left;'> " + data[j].sellerName + "</td>";
+          if (checkIfIdPresent(data[j].itemId) == 0) {
+            innerHTML += '<td><div id= "' + data[j].itemId + '"><button type="button"  class="btn btn-default mr-4  btn-light" onclick="addShippingCart(' + data[j].itemId + ')"><i class="material-icons">add_shopping_cart</i></button></div><td>';
+          } else {
+            innerHTML += '<td><div id= "' + data[j].itemId + '"><button type="button"  class="btn btn-default  mr-4  btn-light" onclick="removeShippingCart(' + data[j].itemId +
+              ',0)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button></div><td>';
+          }
+          innerHTML += "</tr>";
+        }
+        innerHTML += "</tbody></table>";
+        if (data.length > 10) {
+          innerHTML += '<nav aria-label="..."><ul class="pagination justify-content-center"><li class="page-item disabled"><a class="page-link" tabindex="-1"><span style="margin-right:4px;">&laquo;</span><span>Previous</span></a></li>';
+          var count_pages = data.length / 10;
+          for (var i = 0; i < count_pages; i++) {
+            if (i == 0) {
+              innerHTML += '<li class="page-item active"><a class="page-link active" href="javascript:void(0)"><b>' + (i + 1) + '</b></a></li>';
+            } else {
+              innerHTML += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="displayPage(' + (i + 1) + ')"><b>' + (i + 1) + '</b></a></li>';
+            }
+          }
+          innerHTML += '<li  class="page-item"><a class="page-link" href="javascript:void(0)" tabindex="-1" onclick="displayPage(2)"><b><span>Next</span><span style="margin-left:4px;">&raquo;</span></b></a></li></ul></nav>';
+        }
+      } else {
+        innerHTML = "\
+                        <div class='alert alert-warning' role='alert'>\
+                        No Records.\
+                    </div>";
+      }
+      document.getElementById("results").innerHTML = innerHTML;
+      $('#pills-tab-showresults li:first-child a').tab('show') // Select first tab
+    }
+
+    var similar_items_details_array = [];
+
+    function displayPage(page) {
+      document.getElementById('wish_main_div').style.display = "none";
+      document.getElementById('product_details_div_result').style.display = "none";
+      document.getElementById('result_main_div').style.display = "block";
+      document.getElementById('results').style.display = "block";
+      innerHTML =
+        "<table class='table table-striped table-dark'> <thead> <tr> <th>#</th><th>Image</th>  <th> Title </th>  <th> Price  </th> <th>Shipping</th>  <th>  Zip </th>  <th> Seller  </th>  <th> Wish List  </th>   </tr> </thead><tbody>";
+      for (var j = (page - 1) * 10, i = 0; j < data.length && i < 10; j++, i++) {
+        innerHTML += "<tr id=row_" + data[j].itemId + ">";
+
+        innerHTML += "<td style='text-align:left'> " + data[j].index + "</td>";
+        if (data[j].image != "N/A") {
+          innerHTML += "<td> <a href='" + data[j].image + "' target='_blank' ><img style='padding:5px 5px 5px 5px;' height = '75px' width ='75px' src = '" + data[j].image + "'/></a></td>";
+        } else {
+          innerHTML += "<td style='text-align:left'> N/A </td>";
+        }
+        var title_temp = data[j].title;
+        innerHTML += "<td style='text-align:left;' class='tooltip_class'><form action='' method='post'> <a data-toggle='tooltip' data-placement='bottom' title = '" + data[j].title + "' href='javascript:void(0)' onclick=getDetails('" + data[j]
+          .itemId + "')>" + truncate(
+            title_temp) + "</a>";
+        innerHTML += '</td>';
+        innerHTML += "<td style='text-align:left;'>$" + data[j].price + "</td>";
+        innerHTML += "<td style='text-align:left;'> " + data[j].shipping + "</td>";
+        innerHTML += "<td style='text-align:left;'> " + data[j].zipcode + "</td>";
+        innerHTML += "<td style='text-align:left;'> " + data[j].sellerName + "</td>";
+        if (checkIfIdPresent(data[j].itemId) == 0) {
+          innerHTML += '<td><div id= "' + data[j].itemId + '"><button type="button"  class="btn btn-default  mr-4  btn-light" onclick="addShippingCart(' + data[j].itemId + ')"><i class="material-icons">add_shopping_cart</i></button></div><td>';
+        } else {
+          innerHTML += '<td><div id= "' + data[j].itemId + '"><button type="button"  class="btn btn-default  mr-4  btn-light" onclick="removeShippingCart(' + data[j].itemId +
+            ',0)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button></div><td>';
+        }
+        innerHTML += "</tr>";
+
+      }
+      innerHTML += "</tbody></table>";
+      if (page == 1) {
+        innerHTML +=
+          '<nav aria-label="..."><ul class="pagination justify-content-center"><li class="page-item disabled"><a class="page-link" href="javascript:void(0)" tabindex="-1"><span style="margin-right:6px;">&laquo;</span><span>Previous</span></a></li>';
+      } else {
+        innerHTML += '<nav aria-label="..."><ul class="pagination justify-content-center"><li class="page-item"><a class="page-link" href="javascript:void(0)" tabindex="-1" onclick="displayPage(' + (page - 1) +
+          ')"><b><span style="margin-right:6px;">&laquo;</span><span>Previous</span></b></a></li>';
+      }
+      var count_pages = data.length / 10;
+      for (var i = 0; i < count_pages; i++) {
+        if (i == page - 1) {
+          innerHTML += '<li class="page-item active"><a class="page-link active" href="javascript:void(0)"><b>' + (i + 1) + '</b></a></li>';
+        } else {
+          innerHTML += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="displayPage(' + (i + 1) + ')"><b>' + (i + 1) + '</b></a></li>';
+        }
+      }
+      if (page == Math.ceil(data.length / 10)) {
+        innerHTML += '<li  class="page-item disabled"><a class="page-link" href="javascript:void(0)" tabindex="-1"><span>Next</span><span style="margin-left:4px;">&raquo;</span></a></li>';
+      } else {
+        innerHTML += '<li class="page-item"><a class="page-link" href="javascript:void(0)" tabindex="-1" onclick="displayPage(' + (page + 1) +
+          ')"><b><span>Next</span><span style="margin-left:4px;">&raquo;</span></b></a></li></ul></nav>';
+      }
+      document.getElementById("results").innerHTML = innerHTML;
+      return false;
+    }
+
+
+    var tabs = '<ul class="row nav nav-pills mb-4 nav ml-auto w-100 justify-content-end" id="pills-tab" role="tablist"> <li class="nav-item"> \
+        <a class="nav-link active" id="pills-product-tab" data-toggle="pill" href="#product" role="tab" aria-controls="pills-product" aria-selected="true">Product</a>\
+      </li>\
+      <li class="nav-item">\
+        <a class="nav-link" id="pills-product-tab" data-toggle="pill" href="#photos" role="tab" aria-controls="pills-photos" aria-selected="false">Photos</a>\
+      </li>\
+      <li class="nav-item">\
+        <a class="nav-link" id="pills-shipping-tab" data-toggle="pill" href="#shipping" role="tab" aria-controls="pills-shipping" aria-selected="false">Shipping</a>\
+      </li>\
+      <li class="nav-item">\
+        <a class="nav-link" id="pills-seller-tab" data-toggle="pill" href="#seller" role="tab" aria-controls="pills-seller" aria-selected="false">Seller</a>\
+      </li>\
+      <li class="nav-item">\
+      <a class="nav-link d-none d-lg-block" id="pills-similar-tab" data-toggle="pill" href="#simliar" role="tab" aria-controls="pills-similar" aria-selected="false">Similar Products</a>\
+      <a class="nav-link d-lg-none" id="pills-similar-tab" data-toggle="pill" href="#simliar" role="tab" aria-controls="pills-similar" aria-selected="false">Related</a>\
+      </li>\
+    </ul>\
+    <div class="tab-content" id="pills-tabContent">\
+      <div class="tab-pane fade show active" id="product" role="tabpanel" aria-labelledby="pills-home-tab"></div>\
+      <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="pills-photos-tab"></div>\
+      <div class="tab-pane fade" id="shipping" role="tabpanel" aria-labelledby="pills-shipping-tab"></div>\
+      <div class="tab-pane fade" id="seller" role="tabpanel" aria-labelledby="pills-seller-tab"></div>\
+      <div class="tab-pane fade" id="simliar" role="tabpanel" aria-labelledby="pills-similar-tab"></div>\
+    </div>\
+    ';
+
+
+
+    var previousID_results = "";
+
+
+    function getDetails(id) {
+      document.getElementById('result_div').style.display = "none";
+      document.getElementById('product_details_div_result').style.display = "block";
+      document.getElementById('display_forward_button_result').style.display = "block";
+      document.getElementById('display_forward_button_result').disabled = false;
+      var content = '<div class="progress"> <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%"></div></div>';
+      document.getElementById('product_details_div_result_display').innerHTML = content;
+      insideDetails = 1;
+      detailsFromResults = 1;
+      var results = document.querySelectorAll('[id^="row_"]');
+      for (var i = 0; i < results.length; i++) {
+        var currid = results[i].id
+        document.getElementById(currid).style.background = "#000";
+      }
+      var curr_id = 'row_' + id;
+      document.getElementById(curr_id).style.background = "#cfd2d6";
+      if (previousID_results != "" && previousID_results != curr_id && document.getElementById(previousID_results) != null) {
+        document.getElementById(previousID_results).style.background = "#000";
+      }
+      previousID_results = 'row_' + id;
+      $.ajax({
+        url: 'http://csci571-mukund-hw8.us-east-2.elasticbeanstalk.com/getDetails',
+        type: 'GET',
+        contentType: "application/json",
+        data: {
+          itemId: id
+        },
+        success: function(results) {
+          displayDetailsResults(results, id);
+        }
+      });
+    }
+
+
+    var previousID_wish = "";
+
+    function getDetailsFromWish(id) {
+      document.getElementById('wish_list_div').style.display = "none";
+      document.getElementById('product_details_div_wish').style.display = "block";
+      document.getElementById('display_forward_button_wish').style.display = "block";
+      document.getElementById('display_forward_button_wish').disabled = false;
+      var content = '<div class="progress"> <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%"></div></div>';
+      document.getElementById('product_details_div_wish_display').innerHTML = content;
+      insideDetails = 1;
+      detailsFromResults = 0;
+      var results = document.querySelectorAll('[id^="wish_row_"]');
+      for (var i = 0; i < results.length; i++) {
+        var currid = results[i].id
+        document.getElementById(currid).style.background = "#000";
+      }
+      var curr_id = 'wish_row_' + id;
+      document.getElementById(curr_id).style.background = "#cfd2d6";
+      if (previousID_wish != "" && curr_id !=  previousID_wish && document.getElementById(previousID_wish) != null) {
+        document.getElementById(previousID_wish).style.background = "#000";
+      }
+      previousID_wish = 'wish_row_' + id;
+      $.ajax({
+        url: 'http://csci571-mukund-hw8.us-east-2.elasticbeanstalk.com/getDetails',
+        type: 'GET',
+        contentType: "application/json",
+        data: {
+          itemId: id
+        },
+        success: function(results) {
+          displayDetailsWishList(results, id);
+        }
+      });
+    }
+
+    /*function showSearchResultsOrWishList() {
+      insideDetails = 0;
+      document.getElementById('product_details_div').style.display = "none";
+      document.getElementById('display_forward_button').disabled = false;
+      document.getElementById('result_wish_list').style.display = "block";
+    }
+
+    function showWishList() {
+      document.getElementById('product_details_div').style.display = "none";
+      document.getElementById('result').style.display = "none";
+      document.getElementById('wish_list_div').style.display = "block";
+      document.getElementById('wish_list').style.display = "block";
+    }*/
+
+    /*function showSearchResults() {
+      document.getElementById('wish_list').style.display = "none";
+      if (detailsFromResults != -1) {
+        if (detailsFromResults == 0) {
+          document.getElementById('display_forward_button').disabled = true;
+        } else {
+          document.getElementById('display_forward_button').disabled = false;
+
+        }
+      }
+      if (insideDetails == 0) {
+        document.getElementById('product_details_div').style.display = "none";
+        document.getElementById('result_wish_list').style.display = "block";
+        document.getElementById('result').style.display = "block";
+      } else {
+        document.getElementById('result_wish_list').style.display = "none";
+        document.getElementById('product_details_div').style.display = "block";
+        return false;
+      }
+    }*/
+
+    function clearItems() {
+      document.getElementById('product_details_div_result_display').innerHTML = "";
+      document.getElementById('results').innerHTML = "";
+      document.getElementById('display_forward_button_result').style.display = "none";
+      $('#pills-tab-showresults li:first-child a').tab('show') // Select first tab
+      $("#submit_button").prop("disabled", true);
+      document.getElementById("searchForm").reset();
+    }
+
+
+    function showDetails() {
+      document.getElementById('result_wish_list').style.display = "none";
+      document.getElementById('product_details_div').style.display = "block";
+    }
+
+    var title;
+    var price;
+    var url;
+
+
+    function displayDetailsResults(detailsData, id) {
+      product_details_id = id;
+      /************************************************products tab*****************************************/
+      product_details = detailsData;
+      var result = detailsData;
+      title = result.product_details.Title;
+      price = result.product_details.Price;
+      url = result.product_details.facebook_link;
+      var detailsHTML = '';
+      if (result.product_details.Title != "N/A") {
+        detailsHTML += '<p class="font-weight-bold text-center">' + result.product_details.Title + '</p>';
+      }
+      var button_temp = document.getElementById('display_backward_button_result');
+      var button_clone = button_temp.cloneNode(true);
+      button_clone.style.display = "block";
+      detailsHTML += '<div class="row">' + button_clone.outerHTML;
+
+      detailsHTML += '<div class="ml-auto d-flex justify-content-end">'
+      detailsHTML += "<a href='javascript:void(0)' style='margin-right:5px'  onclick=postFacebook()> <img src='http://csci571.com/hw/hw8/Images/facebook.png' width='40'></img></a>";
+      if (checkIfIdPresent(id) == 0) {
+        detailsHTML += '<td><div id= "details_' + id + '"><button id="button_wish_list  btn-light" type="button"  class="btn btn-default mr-4" onclick="addShippingCart(' + id +
+          ')"><i class="material-icons">add_shopping_cart</i></button></div><td>';
+      } else {
+        detailsHTML += '<td><div id= details_' + id + '><button id="button_wish_list" type="button"  class="btn btn-default mr-4  btn-light" onclick="removeShippingCart(' + id +
+          ',0)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button></div><td>';
+      }
+      detailsHTML += '</div></div>'
+      detailsHTML += tabs;
+
+      /************************************************products tab*****************************************/
+      var productDetails = "<table class='table table-striped table-dark'><tbody>";
+      productDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Product Images</th><td class="col-7 green_a"><a href="#lightbox" data-toggle="modal">View Product Images Here </a></tr>';
+      if (result.product_details.Price != "N/A") {
+        productDetails += '<tr class="d-flex"><th scope="row" class="col-5">Price</th><td class="col-7">' + result.product_details.Price + '</tr>';
+      }
+      if (result.product_details.Location != "N/A") {
+        productDetails += '<tr class="d-flex"><th scope="row" class="col-5">Location</th><td class="col-7">' + result.product_details.Location + '</tr>';
+      }
+      if (result.product_details.Return_Policy != "N/A") {
+        productDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Return Policy</th><td class="col-7">' + result.product_details.Return_Policy + '</tr>';
+      }
+      productDetails += '<div class="modal fade and carousel slide" id="lightbox">\
+                            <div class="modal-dialog modal-dialog-centered">\
+                              <div class="modal-content">\
+                                <div class="modal-header">\
+                                  <h4 class="modal-title">Product Images</h4>\
+                                  <button type="button" class="close" data-dismiss="modal">&times;</button>\
+                                </div>\
+                                <div class="modal-body">\
+                                  <div class="carousel-inner" data-interval="false">';
+      var photos = result.product_details.Photo;
+      if (photos.length != 0) {
+        for (var i = 0; i < photos.length; i++) {
+          if (i == 0) {
+            productDetails += '<div class="carousel-item active">\
+                                              <a href="' + photos[i] + '" target="_blank"><img src="' + photos[i] + '" alt="First slide"></a>\
+                                          </div>';
+          } else {
+            productDetails += '<div class="carousel-item">\
+                                              <a href="' + photos[i] + '" target="_blank"><img src="' + photos[i] + '" alt="First slide"></a>\
+                                          </div>';
+          }
+        }
+        productDetails += '</div><!-- /.carousel-inner -->\
+                                        <a class="carousel-control-prev" href="#lightbox" role="button" data-slide="prev" data-interval="false">\
+                                          <span style="background-color:black" class="carousel-control-prev-icon" aria-hidden="true"></span>\
+                                        </a>\
+                                        <a class="carousel-control-next" href="#lightbox" role="button" data-slide="next" data-interval="false">\
+                                          <span style="background-color:black"  class="carousel-control-next-icon" aria-hidden="true"></span>\
+                                        </a>\
+                                      </div><!-- /.modal-body -->\
+                                <div class="modal-footer">\
+                                      <button type="button" class="btn" data-dismiss="modal">Close</button>\
+                                </div>\
+                                </div><!-- /.modal-content -->\
+                              </div><!-- /.modal-dialog -->\
+                            </div><!-- /.modal -->';
+      }
+      var itemSpecifies = result.product_details.ItemSpecifics;
+      var itemSpecifiesKeys = Object.keys(result.product_details.ItemSpecifics);
+      for (i = 0; i < itemSpecifiesKeys.length; i++) {
+        productDetails += '<tr class="d-flex"><th scope="row" class=" col-5">' + itemSpecifiesKeys[i] + '</th><td class="col-7">' + itemSpecifies[itemSpecifiesKeys[i]] + '</tr>';
+      }
+      productDetails += "</tbody> </table>";
+      document.getElementById("product_details_div_result_display").innerHTML = detailsHTML;
+      document.getElementById("product").innerHTML = productDetails;
+
+      /************************************************products tab*****************************************/
+
+
+      /************************************************photos tab*****************************************/
+
+      photos_information = result.product_details.google_photos;
+      if (typeof photos_information[1] !== 'undefined') {
+        photosDetails = '<div class="card-columns">';
+        photosDetails += '<div class="card"><a href="' + photos_information[1] + '" target="_blank"><img class="card-img" src="' + photos_information[1] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[2] + '" target="_blank"><img class="card-img" src="' + photos_information[2] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[3] + '" target="_blank"><img class="card-img" src="' + photos_information[3] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[4] + '" target="_blank"><img class="card-img" src="' + photos_information[4] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[5] + '" target="_blank"><img class="card-img" src="' + photos_information[5] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[6] + '" target="_blank"><img class="card-img" src="' + photos_information[6] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[7] + '" target="_blank"><img class="card-img" src="' + photos_information[7] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[8] + '" target="_blank"><img class="card-img" src="' + photos_information[8] + '" alt="Card image"> </a></div>';
+        photosDetails += '</div>';
+      } else {
+        photosDetails = "<div class='alert alert-warning' role='alert'>\
+          No images found.\
+      </div>";
+      }
+      document.getElementById("photos").innerHTML = photosDetails;
+
+
+      /************************************************photos tab*****************************************/
+
+
+      /************************************************shipping tab*****************************************/
+
+      var shippingInfo = {};
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].itemId == id) {
+          shippingInfo = data[i].shipping_tab;
+        }
+      }
+
+      var shippingDetails = "<table class='table table-striped table-dark'><tbody>";
+      if (shippingInfo.shipping_cost != "N/A") {
+        shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Shipping Cost</th><td class="col-7">' + shippingInfo.shipping_cost + '</tr>';
+      }
+      if (shippingInfo.shipping_locations != "N/A") {
+        shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Shipping Locations</th><td class="col-7">' + shippingInfo.shipping_locations + '</tr>';
+      }
+      if (shippingInfo.handling_time != "N/A") {
+        shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Handling Time</th><td class="col-7">' + shippingInfo.handling_time + '</tr>';
+      }
+      if (shippingInfo.expedited_shipping != "N/A") {
+        if (shippingInfo.expedited_shipping == "false") {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Expedited Shipping</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Expedited Shipping</th><td class="col-7"><i class="material-icons" style="color:green">done</i></tr>';
+        }
+      }
+      if (shippingInfo.oneDayShippingAvailable != "N/A") {
+        if (shippingInfo.oneDayShippingAvailable == "false") {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">One Day Shipping</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">One Day Shipping</th><td class="col-7"><i class="material-icons" style="color:green">done</i> </tr>';
+        }
+      }
+      if (shippingInfo.returns_accepted != "N/A") {
+        if (shippingInfo.returns_accepted == "false") {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Return Accepted</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Return Accepted</th><td class="col-7"><i class="material-icons" style="color:green">done</i></tr>';
+        }
+      }
+      document.getElementById("shipping").innerHTML = shippingDetails;
+      /************************************************shipping tab*****************************************/
+
+
+
+      /************************************************Seller tab*****************************************/
+      var sellerInfo = result.product_details.seller_tab;
+      var sellerDetails = "<table class='table table-striped table-dark'><tbody>";
+      if (sellerInfo.seller_name != "N/A") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-12 text-center"><h4>' + sellerInfo.seller_name + '</h4></th></tr>';
+      }
+      if (sellerInfo.feedback_score != "N/A") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Score</th><td class="col-7">' + sellerInfo.feedback_score + '</tr>';
+
+        var scope = angular.element($("#round_progress")).scope();
+        scope.$apply(function() {
+          scope.current = sellerInfo.popularity;
+        })
+        var div = document.getElementById('round_progress');
+        clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
+        clone.id = "new" + clone.id;
+        if (sellerInfo.popularity != "N/A") {
+            sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Popularity</th><td class="col-7"> <div class="round_progress_bar" id="round-progress-bar">  <div class="seller_info_popularity"> ' + sellerInfo.popularity +
+          '</div></div> </tr>';
+        }
+        if (sellerInfo.feedback_score >= 10000) {
+          sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Rating Star</th><td class="col-7"><i class="material-icons" style="color:yellow">stars</i></tr>';
+        } else {
+          if (sellerInfo.feedback_score < 9) {
+            sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Rating Star</th><td class="col-7"><i class="material-icons" style="color:white">star_border</i></a></tr>';
+          } else {
+            if (sellerInfo.feedback_rating_star != "N/A") {
+              sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Rating Star</th><td class="col-7"><i class="material-icons" style="color:' + sellerInfo.feedback_rating_star + '">star_border</i></a></tr>';
+            }
+          }
+        }
+      }
+      if (sellerInfo.toprated != "N/A") {
+        if (sellerInfo.toprated == "true") {
+          sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Top Rated</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Top Rated</th><td class="col-7"><i class="material-icons" style="color:green">done</i></tr>';
+        }
+
+      }
+      if (sellerInfo.storename != "N/A" && sellerInfo.storename != "") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Store Name</th><td class="col-7">' + sellerInfo.storename + '</tr>';
+      }
+      if (sellerInfo.buy_product_at != "N/A" && sellerInfo.buy_product_at != "") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Buy product at</th><td class="col-7"><a href="' + sellerInfo.buy_product_at + '" target="_blank">Store</a></tr>';
+      }
+      document.getElementById("seller").innerHTML = sellerDetails;
+      document.getElementById("round-progress-bar").append(clone);
+      document.getElementById("newround_progress").style.display = "block";
+
+      /************************************************Seller tab*****************************************/
+
+      /************************************************Similar Items tab*****************************************/
+      var dropDownSimilar = ' <div class="drop-down row">\
+                                <select class="custom-select col-sm-12 col-md-12 col-lg-2 col-xl-2  mr-xl-2 mr-lg-2" onchange="sortAndDisplay()" id="select-1">\
+                                  <option value="default" selected>Default</option>\
+                                  <option value="title">Product Name</option>\
+                                  <option value="days_left">Days Left</option>\
+                                  <option value="price">Price</option>\
+                                  <option value="shipping_cost">Shipping Cost</option>\
+                                </select>\
+                                <select class="custom-select col-sm-12 col-md-12 col-lg-2 col-xl-2" id="select-2"  onchange="sortAndDisplay()" disabled>\
+                                  <option value="1" selected>Ascending</option>\
+                                  <option value="2">Descending</option>\
+                                </select>\
+                        </div>\
+                        <div id="display_similar_items">';
+      similar_items_details = dropDownSimilar;
+      similar_items_details_array = result.product_details.similar_items;
+      similar_items_details += constructSimilarItems(similar_items_details_array);
+      similar_items_details += '</div>';
+      document.getElementById("simliar").innerHTML = similar_items_details;
+
+      /*************************************************Similar Items tab*****************************************/
+
+
+    }
+
+
+    function displayDetailsWishList(detailsData, id) {
+      var tabs1 = '<ul class="row nav nav-pills mb-4 nav ml-auto w-100 justify-content-end" id="pills-tab" role="tablist"> <li class="nav-item"> \
+          <a class="nav-link active" id="pills-product-tab" data-toggle="pill" href="#product_wish" role="tab" aria-controls="pills-product" aria-selected="true">Product</a>\
+        </li>\
+        <li class="nav-item">\
+          <a class="nav-link" id="pills-product-tab" data-toggle="pill" href="#photos_wish" role="tab" aria-controls="pills-photos" aria-selected="false">Photos</a>\
+        </li>\
+        <li class="nav-item">\
+          <a class="nav-link" id="pills-shipping-tab" data-toggle="pill" href="#shipping_wish" role="tab" aria-controls="pills-shipping" aria-selected="false">Shipping</a>\
+        </li>\
+        <li class="nav-item">\
+          <a class="nav-link" id="pills-seller-tab" data-toggle="pill" href="#seller_wish" role="tab" aria-controls="pills-seller" aria-selected="false">Seller</a>\
+        </li>\
+        <li class="nav-item">\
+        <a class="nav-link d-none d-lg-block" id="pills-similar-tab" data-toggle="pill" href="#simliar_wish" role="tab" aria-controls="pills-similar" aria-selected="false">Similar Products</a>\
+        <a class="nav-link d-lg-none" id="pills-similar-tab" data-toggle="pill" href="#simliar_wish" role="tab" aria-controls="pills-similar" aria-selected="false">Related</a>\
+        </li>\
+      </ul>\
+      <div class="tab-content" id="pills-tabContent">\
+        <div class="tab-pane fade show active" id="product_wish" role="tabpanel" aria-labelledby="pills-home-tab"></div>\
+        <div class="tab-pane fade" id="photos_wish" role="tabpanel" aria-labelledby="pills-photos-tab"></div>\
+        <div class="tab-pane fade" id="shipping_wish" role="tabpanel" aria-labelledby="pills-shipping-tab"></div>\
+        <div class="tab-pane fade" id="seller_wish" role="tabpanel" aria-labelledby="pills-seller-tab"></div>\
+        <div class="tab-pane fade" id="simliar_wish" role="tabpanel" aria-labelledby="pills-similar-tab"></div>\
+      </div>\
+      ';
+      product_details_id = id;
+      /************************************************products tab*****************************************/
+      product_details = detailsData;
+      var result = detailsData;
+      title = result.product_details.Title;
+      price = result.product_details.Price;
+      url = result.product_details.facebook_link;
+      var detailsHTML = '';
+      if (result.product_details.Title != "N/A") {
+        detailsHTML += '<p class="font-weight-bold text-center">' + result.product_details.Title + '</p>';
+      }
+      var button_temp = document.getElementById('display_backward_button_wish');
+      var button_clone = button_temp.cloneNode(true);
+      button_clone.style.display = "block";
+      detailsHTML += '<div class="row">' + button_clone.outerHTML;
+
+      detailsHTML += '<div class="ml-auto d-flex justify-content-end">'
+      detailsHTML += "<a href='javascript:void(0)' style='margin-right:5px'  onclick=postFacebook()> <img src='http://csci571.com/hw/hw8/Images/facebook.png' width='40'></img></a>";
+      if (checkIfIdPresent(id) == 0) {
+        detailsHTML += '<td><div id= "details_' + id + '"><button id="button_wish_list  btn-light" type="button"  class="btn btn-default mr-4" onclick="addShippingCart(' + id +
+          ')"><i class="material-icons">add_shopping_cart</i></button></div><td>';
+      } else {
+        detailsHTML += '<td><div id= details_' + id + '><button id="button_wish_list" type="button"  class="btn btn-default mr-4  btn-light" onclick="removeShippingCart(' + id +
+          ',0)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button></div><td>';
+      }
+      detailsHTML += '</div></div>'
+      detailsHTML += tabs1;
+
+      /************************************************products tab*****************************************/
+      var productDetails = "<table class='table table-striped table-dark'><tbody>";
+      productDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Product Images</th><td class="col-7 green_a"><a href="#lightbox" data-toggle="modal">View Product Images Here </a></tr>';
+      if (result.product_details.Price != "N/A") {
+        productDetails += '<tr class="d-flex"><th scope="row" class="col-5">Price</th><td class="col-7">' + result.product_details.Price + '</tr>';
+      }
+      if (result.product_details.Location != "N/A") {
+        productDetails += '<tr class="d-flex"><th scope="row" class="col-5">Location</th><td class="col-7">' + result.product_details.Location + '</tr>';
+      }
+      if (result.product_details.Return_Policy != "N/A") {
+        productDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Return Policy</th><td class="col-7">' + result.product_details.Return_Policy + '</tr>';
+      }
+      productDetails += '<div class="modal fade and carousel slide" id="lightbox">\
+                            <div class="modal-dialog modal-dialog-centered">\
+                              <div class="modal-content">\
+                                <div class="modal-header">\
+                                  <h4 class="modal-title">Product Images</h4>\
+                                  <button type="button" class="close" data-dismiss="modal">&times;</button>\
+                                </div>\
+                                <div class="modal-body">\
+                                  <div class="carousel-inner" data-interval="false">';
+      var photos = result.product_details.Photo;
+      if (photos.length != 0) {
+        for (var i = 0; i < photos.length; i++) {
+          if (i == 0) {
+            productDetails += '<div class="carousel-item active">\
+                                              <a href="' + photos[i] + '" target="_blank"><img src="' + photos[i] + '" alt="First slide"></a>\
+                                          </div>';
+          } else {
+            productDetails += '<div class="carousel-item">\
+                                              <a href="' + photos[i] + '" target="_blank"><img src="' + photos[i] + '" alt="First slide"></a>\
+                                          </div>';
+          }
+        }
+        productDetails += '</div><!-- /.carousel-inner -->\
+                                        <a class="carousel-control-prev" href="#lightbox" role="button" data-slide="prev" data-interval="false">\
+                                          <span style="background-color:black" class="carousel-control-prev-icon" aria-hidden="true"></span>\
+                                        </a>\
+                                        <a class="carousel-control-next" href="#lightbox" role="button" data-slide="next" data-interval="false">\
+                                          <span style="background-color:black"  class="carousel-control-next-icon" aria-hidden="true"></span>\
+                                        </a>\
+                                      </div><!-- /.modal-body -->\
+                                <div class="modal-footer">\
+                                      <button type="button" class="btn" data-dismiss="modal">Close</button>\
+                                </div>\
+                                </div><!-- /.modal-content -->\
+                              </div><!-- /.modal-dialog -->\
+                            </div><!-- /.modal -->';
+      }
+      var itemSpecifies = result.product_details.ItemSpecifics;
+      var itemSpecifiesKeys = Object.keys(result.product_details.ItemSpecifics);
+      for (i = 0; i < itemSpecifiesKeys.length; i++) {
+        productDetails += '<tr class="d-flex"><th scope="row" class=" col-5">' + itemSpecifiesKeys[i] + '</th><td class="col-7">' + itemSpecifies[itemSpecifiesKeys[i]] + '</tr>';
+      }
+      productDetails += "</tbody> </table>";
+      document.getElementById("product_details_div_wish_display").innerHTML = detailsHTML;
+      document.getElementById("product_wish").innerHTML = productDetails;
+
+      /************************************************products tab*****************************************/
+
+
+      /************************************************photos tab*****************************************/
+
+      photos_information = result.product_details.google_photos;
+      if (typeof photos_information[1] !== 'undefined') {
+        photosDetails = '<div class="card-columns">';
+        photosDetails += '<div class="card"><a href="' + photos_information[1] + '" target="_blank"><img class="card-img" src="' + photos_information[1] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[2] + '" target="_blank"><img class="card-img" src="' + photos_information[2] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[3] + '" target="_blank"><img class="card-img" src="' + photos_information[3] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[4] + '" target="_blank"><img class="card-img" src="' + photos_information[4] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[5] + '" target="_blank"><img class="card-img" src="' + photos_information[5] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[6] + '" target="_blank"><img class="card-img" src="' + photos_information[6] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[7] + '" target="_blank"><img class="card-img" src="' + photos_information[7] + '" alt="Card image"> </a></div>';
+        photosDetails += '<div class="card"><a href="' + photos_information[8] + '" target="_blank"><img class="card-img" src="' + photos_information[8] + '" alt="Card image"> </a></div>';
+        photosDetails += '</div>';
+      } else {
+        photosDetails = "<div class='alert alert-warning' role='alert'>\
+          No images found.\
+      </div>";
+      }
+      document.getElementById("photos_wish").innerHTML = photosDetails;
+
+
+      /************************************************photos tab*****************************************/
+
+
+      /************************************************shipping tab*****************************************/
+
+      var shippingInfo = {};
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].itemId == id) {
+          shippingInfo = data[i].shipping_tab;
+        }
+      }
+
+      var shippingDetails = "<table class='table table-striped table-dark'><tbody>";
+      if (shippingInfo.shipping_cost != "N/A") {
+        shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Shipping Cost</th><td class="col-7">' + shippingInfo.shipping_cost + '</tr>';
+      }
+      if (shippingInfo.shipping_locations != "N/A") {
+        shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Shipping Locations</th><td class="col-7">' + shippingInfo.shipping_locations + '</tr>';
+      }
+      if (shippingInfo.handling_time != "N/A") {
+        shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Handling Time</th><td class="col-7">' + shippingInfo.handling_time + '</tr>';
+      }
+      if (shippingInfo.expedited_shipping != "N/A") {
+        if (shippingInfo.expedited_shipping == "false") {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Expedited Shipping</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Expedited Shipping</th><td class="col-7"><i class="material-icons" style="color:green">done</i></tr>';
+        }
+      }
+      if (shippingInfo.oneDayShippingAvailable != "N/A") {
+        if (shippingInfo.oneDayShippingAvailable == "false") {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">One Day Shipping</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">One Day Shipping</th><td class="col-7"><i class="material-icons" style="color:green">done</i> </tr>';
+        }
+      }
+      if (shippingInfo.returns_accepted != "N/A") {
+        if (shippingInfo.returns_accepted == "false") {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Return Accepted</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          shippingDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Return Accepted</th><td class="col-7"><i class="material-icons" style="color:green">done</i></tr>';
+        }
+      }
+      document.getElementById("shipping_wish").innerHTML = shippingDetails;
+      /************************************************shipping tab*****************************************/
+
+
+
+      /************************************************Seller tab*****************************************/
+      var sellerInfo = result.product_details.seller_tab;
+      var sellerDetails = "<table class='table table-striped table-dark'><tbody>";
+      if (sellerInfo.seller_name != "N/A") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-12 text-center"><h4>' + sellerInfo.seller_name + '</h4></th></tr>';
+      }
+      if (sellerInfo.feedback_score != "N/A") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Score</th><td class="col-7">' + sellerInfo.feedback_score + '</tr>';
+
+        var scope = angular.element($("#round_progress")).scope();
+        scope.$apply(function() {
+          scope.current = sellerInfo.popularity;
+        })
+        var div = document.getElementById('round_progress');
+        clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
+        clone.id = "new" + clone.id;
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Popularity</th><td class="col-7"> <div class="round_progress_bar" id="round-progress-bar">  <div class="seller_info_popularity"> ' + sellerInfo.popularity +
+          '</div></div> </tr>';
+        if (sellerInfo.feedback_score >= 10000) {
+          sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Rating Star</th><td class="col-7"><i class="material-icons" style="color:yellow">stars</i></tr>';
+        } else {
+          if (sellerInfo.feedback_score < 9) {
+            sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Rating Star</th><td class="col-7"><i class="material-icons" style="color:white">star_border</i></a></tr>';
+          } else {
+            if (sellerInfo.feedback_rating_star != "N/A") {
+              sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Feedback Rating Star</th><td class="col-7"><i class="material-icons" style="color:' + sellerInfo.feedback_rating_star + '">star_border</i></a></tr>';
+            }
+          }
+        }
+      }
+      if (sellerInfo.toprated != "N/A") {
+        if (sellerInfo.toprated == "true") {
+          sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Top Rated</th><td class="col-7"><span style="color:red">&#10060;</span></tr>';
+        } else {
+          sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Top Rated</th><td class="col-7"><i class="material-icons" style="color:green">done</i></tr>';
+        }
+
+      }
+      if (sellerInfo.storename != "N/A" && sellerInfo.storename != "") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Store Name</th><td class="col-7">' + sellerInfo.storename + '</tr>';
+      }
+      if (sellerInfo.buy_product_at != "N/A" && sellerInfo.buy_product_at != "") {
+        sellerDetails += '<tr class="d-flex"><th scope="row" class=" col-5">Buy product at</th><td class="col-7"><a href="' + sellerInfo.buy_product_at + '" target="_blank">Store</a></tr>';
+      }
+      document.getElementById("seller_wish").innerHTML = sellerDetails;
+      document.getElementById("round-progress-bar").append(clone);
+      document.getElementById("newround_progress").style.display = "block";
+
+      /************************************************Seller tab*****************************************/
+
+      /************************************************Similar Items tab*****************************************/
+      var dropDownSimilar = ' <div class="drop-down row">\
+                                <select class="custom-select col-sm-12 col-md-12 col-lg-2 col-xl-2  mr-xl-2 mr-lg-2" onchange="sortAndDisplay()" id="select-1">\
+                                  <option value="default" selected>Default</option>\
+                                  <option value="title">Product Name</option>\
+                                  <option value="days_left">Days Left</option>\
+                                  <option value="price">Price</option>\
+                                  <option value="shipping_cost">Shipping Cost</option>\
+                                </select>\
+                                <select class="custom-select col-sm-12 col-md-12 col-lg-2 col-xl-2" id="select-2"  onchange="sortAndDisplay()" disabled>\
+                                  <option value="1" selected>Ascending</option>\
+                                  <option value="2">Descending</option>\
+                                </select>\
+                        </div>\
+                        <div id="display_similar_items">';
+      similar_items_details = dropDownSimilar;
+      similar_items_details_array = result.product_details.similar_items;
+      similar_items_details += constructSimilarItems(similar_items_details_array);
+      similar_items_details += '</div>';
+      document.getElementById("simliar_wish").innerHTML = similar_items_details;
+
+      /*************************************************Similar Items tab*****************************************/
+
+
+    }
+
+
+
+    function postFacebook() {
+      var html = 'Buy ' + title + ' at ' + price + ' from link below';
+      FB.ui({
+        method: 'share',
+        href: url,
+        quote: html
+      }, function(response) {
+        console.log(response);
+      });
+
+    }
+
+    function constructSimilarItems(similarItemsInfo) {
+      var similar_items_details = "";
+      for (var i = 0; i < similarItemsInfo.length; i++) {
+        if (i == 5) {
+          similar_items_details += '<div class = "collapse" id="block-id">';
+        }
+        similar_items_details += ' <div class="mt-3 card bg-dark text-white">\
+                              <div class="row">\
+                              <div class="col-md-2 p-4">\
+                                  <a href="' + similarItemsInfo[i].photo + '" target="_blank"><img src="' + similarItemsInfo[i].photo + '" class="img-thumbnail"> </img></a>\
+                                </div>\
+                                <div class="col-md-10 px-3">\
+                                  <div class="card-block px-3">\
+                                    <p class="card-text pt-4  mb-0 green_a"><a href="' + similarItemsInfo[i].view_item_url + '" target="_blank"> ' + similarItemsInfo[i].title + '</a></p>\
+                                    <p class="card-text mb-0" style="color:#c7ef97"> Price: $' + similarItemsInfo[i].price + '</p>\
+                                    <p class="card-text  mb-0" style="color:#f4f292"> Shipping Cost: $' + similarItemsInfo[i].shipping_cost + '</p>\
+                                    <p class="card-text  mb-0"> Days Left: ' + similarItemsInfo[i].days_left + '</p>\
+                                  </div>\
+                                </div>\
+                              </div>\
+                              </div>';
+      }
+      if (similarItemsInfo.length - 1 > 5) {
+        similar_items_details += '</div>';
+        similar_items_details += '<div class="text-center show-more-less"> <a href="#block-id" class="mt-4 btn-primary btn" data-toggle="collapse" aria-expanded="false" aria-controls="block-id">\
+        <span class="collapsed">\
+          Show more\
+        </span>\
+        <span class="expanded">\
+          Show Less\
+        </span>\
+      </a></div>'
+      }
+      return similar_items_details;
+    }
+
+
+    function checkIfIdPresent(id) {
+      var local_storage_var = localStorage.getItem('wish_list');
+      if (local_storage_var != null) {
+        var wish_list_entries = JSON.parse(local_storage_var);
+        for (var j = 0; j < wish_list_entries.length; j++) {
+          if (wish_list_entries[j].itemId == id) {
+            return 1;
+          }
+        }
+      }
+      return 0;
+    }
+
+    function populateWishList(hideOtherDisplays) {
+      document.getElementById('display_forward_button_wish').style.display = "block";
+      if (hideOtherDisplays == 1) {
+        document.getElementById('result_main_div').style.display = "none";
+        document.getElementById('wish_main_div').style.display = "block";
+      }
+      var local_storage_var = localStorage.getItem('wish_list');
+      if (local_storage_var != null) {
+        var sum = 0;
+        var wish_list_entries = JSON.parse(local_storage_var);
+        populate_wish_list_html =
+          "\
+          <table class='table table-striped table-dark'> <thead> <tr> <th>#</th><th>Image</th>  <th> Title </th>  <th> Price  </th> <th>Shipping</th><th> Seller  </th>  <th> Wish List  </th>   </tr> </thead><tbody>";
+        for (var j = 0; j < wish_list_entries.length; j++) {
+          populate_wish_list_html += "<tr id=wish_row_" + wish_list_entries[j].itemId + ">";
+          populate_wish_list_html += "<td style='text-align:left'> " + (j + 1) + "</td>";
+          if (wish_list_entries[j].PHOTO != "N/A") {
+            populate_wish_list_html += "<td> <a href='" + wish_list_entries[j].image  + "' target='_blank'><img style='padding:5px 5px 5px 5px;' height = '75px' width ='75px' src = '" + wish_list_entries[j].image + "'/></a></td>";
+          } else {
+            populate_wish_list_html += "<td style='text-align:left'> N/A </td>";
+          }
+          var title_temp = wish_list_entries[j].title;
+          populate_wish_list_html += "<td style='text-align:left;' class='tooltip_class'><form action='' method='post'> <a data-toggle='tooltip' data-placement='bottom' title = '" + wish_list_entries[j].title +
+            "' href='javascript:void(0)' onclick=getDetailsFromWish('" + wish_list_entries[j].itemId + "')>" + truncate(
+              title_temp) + "</a>";
+          populate_wish_list_html += '</td>';
+          populate_wish_list_html += "<td style='text-align:left;'>$" + wish_list_entries[j].price + "</td>";
+          var currPriceStr = parseFloat(wish_list_entries[j].price);
+          sum = sum + currPriceStr;
+          populate_wish_list_html += "<td style='text-align:left;'> " + wish_list_entries[j].shipping + "</td>";
+          populate_wish_list_html += "<td style='text-align:left;'> " + wish_list_entries[j].sellerName + "</td>";
+          populate_wish_list_html += '<td><div id= "' + wish_list_entries[j].itemId + '"><button type="button"  class="btn btn-default mb-4 mr-4  btn-light" onclick="removeShippingCart(' + wish_list_entries[j].itemId +
+            ',1)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button></div><td>';
+          populate_wish_list_html += "</tr>";
+        }
+        populate_wish_list_html += "<tr> <td colspan='6' style='text-align:right'>Total Shopping <td style='text-align:left'>$" + sum.toFixed(2) + "</td></tr>"
+        populate_wish_list_html += "</tbody></table>";
+
+        document.getElementById('wish_lists').innerHTML = populate_wish_list_html;
+      } else {
+        populate_wish_list_html = "\
+                        <div class='alert alert-warning' role='alert'>\
+                        No Records.\
+                    </div>";
+        document.getElementById('wish_lists').innerHTML = populate_wish_list_html;
+      }
+    }
+
+
+    function removeShippingCart(id, removeExistingDiv) {
+      var wish_list_entries = localStorage.getItem('wish_list');
+      dataPresent = [];
+      dataPresent = JSON.parse(wish_list_entries);
+      changeData = [];
+      for (var i = 0; i < dataPresent.length; i++) {
+        if (dataPresent[i].itemId != id) {
+          changeData.push(dataPresent[i]);
+        }
+      }
+      if (changeData.length > 0) {
+        localStorage.setItem('wish_list', JSON.stringify(changeData));
+      } else {
+        localStorage.clear();
+      }
+      populateWishList(removeExistingDiv);
+      if (document.getElementById(id) != null) {
+        document.getElementById(id).innerHTML = '<button type="button"  class="btn btn-default mr-4  btn-light" onclick="addShippingCart(' + id + ')"><i class="material-icons">add_shopping_cart</i></button>';
+      }
+      if (document.getElementById('details_' + id) != null) {
+        document.getElementById('details_' + id).innerHTML = '<button type="button"  class="btn btn-default mr-4  btn-light" onclick="addShippingCart(' + id + ')"><i class="material-icons">add_shopping_cart</i></button>';
+      }
+    }
+
+    function sortAndDisplay() {
+      var key = document.getElementById("select-1").value;
+      if (key == "default") {
+        result = similar_items_details_array;
+        divElement = constructSimilarItems(result);
+        document.getElementById("display_similar_items").innerHTML = divElement;
+        document.getElementById("select-2").disabled = true;
+      } else {
+        document.getElementById("select-2").disabled = false;
+        var sort = document.getElementById("select-2").value;
+        if (sort == "1") {
+          var array_temp = similar_items_details_array.slice(0)
+          result = array_temp.sort(function(a, b) {
+            var x = a[key];
+            var y = b[key];
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+          });
+          divElement = constructSimilarItems(result);
+          document.getElementById("display_similar_items").innerHTML = divElement;
+
+        } else {
+          var array_temp = similar_items_details_array.slice(0)
+          result = array_temp.sort(function(a, b) {
+            var x = a[key];
+            var y = b[key];
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+          });
+          divElement = constructSimilarItems(result.reverse());
+          document.getElementById("display_similar_items").innerHTML = divElement;
+        }
+      }
+    }
+
+    function addShippingCart(id) {
+      var dataToAdd;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].itemId == id) {
+          dataToAdd = data[i];
+        }
+      }
+      var wish_list_entries = localStorage.getItem('wish_list');
+      dataPresent = []
+      if (wish_list_entries != null) {
+        dataPresent = JSON.parse(wish_list_entries);
+      }
+      dataPresent.push(dataToAdd)
+      localStorage.setItem('wish_list', JSON.stringify(dataPresent));
+      populateWishList(0);
+      document.getElementById(id).innerHTML = '<button type="button"  class="btn btn-default mr-4  btn-light" onclick="removeShippingCart(' + id + ', 0)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button>';
+      if (document.getElementById('details_' + id) != null) {
+        document.getElementById('details_' + id).innerHTML = '<button type="button"  class="btn btn-default mr-4  btn-light"  onclick="removeShippingCart(' + id +
+          ', 0)"><i class="material-icons" style="color:#e5bb00">remove_shopping_cart</i></button>';
+      }
+    }
+  </script>
+  <script type="text/javascript">
+    $(function() {
+      $('#searchForm').submit(function(e) {
+        document.getElementById('wish_main_div').style.display = "none";
+        var content = '<div class="progress"> <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%"></div></div>';
+        document.getElementById('results').innerHTML = content;
+        e.preventDefault();
+        var data = $("#searchForm").serialize().split("&");
+        var formObj = {};
+        for (var key in data) {
+          var name = data[key].split("=")[0];
+          var value = data[key].split("=")[1];
+          if (value != "") {
+            formObj[name] = value;
+          }
+        }
+        $.ajax({
+          url: ' http://csci571-mukund-hw8.us-east-2.elasticbeanstalk.com/searchResults',
+          type: 'GET',
+          contentType: "application/json",
+          data: formObj,
+          success: function(results) {
+            firstPageReults(results);
+          }
+        });
+      });
+    });
+  </script>
+
+  <script>
+    $(document).on("change paste keyup input focusout", "#product_name", function() {
+      var productname = $("#product_name").val().trim();
+      if (productname.length == 0) {
+        $("#productspan").html('<font color="#cc0000">Please enter a keyword.</font>');
+        $("#submit_button").prop("disabled", true);
+        $("#product_name").css("border", "1px solid red"); //more efficient
+      } else {
+        $("#submit_button").prop("disabled", false);
+        $("#productspan").empty();
+        $("#product_name").css("border", "0px solid red"); //more efficient
+      }
+    });
+
+    $(document).on("change paste keyup input focusout", "#zipcode", function() {
+      var zipcode = $("#zipcode").val();
+      if (zipcode.length == 0) {
+        $("#submit_button").prop("disabled", true);
+        $("#zipcodespan").html('<font color="#cc0000">Please enter a zipcode.</font>');
+        $("#zipcode").css("border", "1px solid red"); //more efficient
+      } else if (zipcode.length != 5) {
+        $("#submit_button").prop("disabled", true);
+        $("#zipcodespan").empty();
+        $("#zipcode").css("border", "0px solid red"); //more efficient
+      } else {
+        if (!isNaN(zipcode) && $("#product_name").val().length > 0) {
+          $("#submit_button").prop("disabled", false);
+        } else {
+          $("#submit_button").prop("disabled", true);
+        }
+        $("#zipcode").css("border", "0px solid red"); //more efficient
+        $("#zipcodespan").empty();
+      }
+    });
+
+
+    $(document).on("click", "#here", function() {
+      $("#zipcode").css("border", "0px solid red"); //more efficient
+      $("#zipcodespan").empty();
+    });
+
+    function enableSubmit() {
+      var name = document.getElementById("product_name").value;
+      if (name.length > 0) {
+        document.getElementById("submit_button").disabled = false;
+      }
+    }
+
+    function disableSubmit() {
+      document.getElementById("submit_button").disabled = true;
+    }
+  </script>
+</head>
+
+<body ng-app="ebayapp" onload="getCurrentLocation();populateWishList(0);">
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <br><br>
+  <div layout="column" ng-cloak class="container">
+    <div class="bg-dark text-white">
+      <h5 class="text-center font-weight-bold pt-4"> Product Search </h5>
+      <form class="needs-validation text-white bg-dark form-horizontal pt-4" method="get" id="searchForm" action="searchResults" ng-init="zip_enable='here'">
+        <div class="form-group required row">
+          <div class="col-sm-2">
+          </div>
+          <div class="control-label  col-sm-2">
+            <label for="keyword">Keyword</label>
+          </div>
+          <div class="col-sm-6">
+            <input type="text" class="form-control" name="product_name" id="product_name" placeholder="Enter Product Name (eg. iPhone 8)">
+            <span id="productspan" value="0"></span>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-2">
+          </div>
+          <div class="col-sm-2">
+            <label for="category">Category</label>
+          </div>
+          <div class="col-sm-6">
+            <div class="col-sm-1">
+            </div>
+            <select class="form-control col-sm-6" name="category">
+              <option value="0">All Categories</option>
+              <option value="550">Art</option>
+              <option value="2984">Baby</option>
+              <option value="267">Books</option>
+              <option value="11450">Clothing, Shoes & Accessories</option>
+              <option value="58058">Computers/Tablets & Networking</option>
+              <option value="26395">Health & Beauty</option>
+              <option value="11233">Music </option>
+              <option value="1249">Video Games & Consoles</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-2">
+          </div>
+          <div class="col-sm-2">
+            <label for="condition">Condition</label>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="col-sm-2">
+            </div>
+            <div class="form-check-inline">
+              <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" name="new" value="New">New
+              </label>
+            </div>
+            <div class="form-check-inline">
+              <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" name="used" value="Used">Used
+              </label>
+            </div>
+            <div class="form-check-inline">
+              <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" name="unspecified" value="Unspecified">Unspecified
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-2">
+          </div>
+          <div class="col-sm-2">
+            <label>Shipping options</label>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-check-inline">
+              <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" id="localpickup_id" name="localpickup" value="Local Pickup">Local Pickup
+              </label>
+            </div>
+            <div class="form-check-inline">
+              <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" id="freeshipping_id" name="freeshipping" value="Free Shipping">Free Shipping
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-2">
+          </div>
+          <div class="col-sm-2">
+            <label for="keyword">Distance (Miles)</label>
+          </div>
+          <div class="col-sm-3">
+            <input id="miles_id" type="number" name="miles" class="form-control" id="product_name" placeholder="10">
+          </div>
+          <input type="hidden" id="zipcode_here" name="zipcode_here" value="">
+        </div>
+
+
+        <div class="form-group required row">
+          <div class="col-sm-2">
+          </div>
+          <div class="col-sm-2 control-label">
+            <label for="keyword control-label">From</label>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio" onclick="enableSubmit()" class="form-check-input" ng-model="zip_enable" name="dis" value="here" id="here" ng-checked="true">Current Location
+              </label>
+            </div>
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio" class="form-check-input" ng-model="zip_enable" name="dis" value="zip" onclick="disableSubmit()" id="zip">Other. Please specify the zip code:
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div ng-controller="roundProgress" id="round_progress" style="display:none">
+          <round-progress max="100" current="current" color="green" bgcolor="#eaeaea" radius="22" stroke="2" semi="false" rounded="true" clockwise="true" responsive="false" duration="0" animation="easeInOutQuart" animation-delay="0">30
+          </round-progress>
+        </div>
+        <div ng-controller="autocomplete as ctrl" ng-cloak class="form-group required row">
+          <div class="col-sm-1">
+          </div>
+          <div class="col-sm-3">
+          </div>
+          <div class="col-sm-6">
+            <md-autocomplete ng-disabled="zip_enable =='here'" md-no-cache="ctrl.noCache" md-selected-item="ctrl.selectedItem" m d-search-text-change="ctrl.searchTextChange(ctrl.searchText)" md-search-text="ctrl.searchText"
+              md-selected-item-change="ctrl.selectedItemChange(item)" md-items="item in ctrl.querySearch(ctrl.searchText)" md-item-text="item.display" md-min-length="3" md-input-name='zipcode' md-input-id='zipcode' md-dropdown-position="bottom">
+
+              <md-item-template>
+                <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+              </md-item-template>
+            </md-autocomplete>
+            <span id="zipcodespan" value="0"></span>
+          </div>
+        </div>
+
+
+        <div class="form-group row button_forms">
+          <div class="col-sm-2"></div>
+          <div class="col-sm-3 control-label">
+            <button type="submit" class="btn btn-default mb-4 mr-4 btn-light" id='submit_button' disabled>
+              <i class="material-icons">search</i>
+              Search
+            </button>
+            <button type="button" class="btn btn-default mb-4 btn-light" onclick="clearItems()">
+              <i class="material-icons">clear_all</i>
+              Clear
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script>
+     function displayResults() {
+       document.getElementById("wish_main_div").style.display ="none";
+       document.getElementById("result_main_div").style.display ="block";
+     }
+
+     function displayWishList() {
+       document.getElementById("result_main_div").style.display ="none";
+       document.getElementById("wish_main_div").style.display ="block";
+     }
+
+     function showSearchResults() {
+       document.getElementById("product_details_div_result").style.display ="none";
+       document.getElementById("result_div").style.display ="block";
+     }
+
+     function showResultDetails() {
+       document.getElementById("product_details_div_result").style.display ="block";
+       document.getElementById("result_div").style.display ="none";
+     }
+
+     function showWishList() {
+       document.getElementById("product_details_div_wish").style.display ="none";
+       document.getElementById("wish_list_div").style.display ="block";
+     }
+
+     function showWishListDetails() {
+       document.getElementById("product_details_div_wish").style.display ="block";
+       document.getElementById("wish_list_div").style.display ="none";
+     }
+
+
+    </script>
+
+    <div class="col-sm-3  mx-auto mt-4">
+      <ul class="nav nav-pills mb-3" id="pills-tab-showresults" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="pills-results-tab" data-toggle="pill" href="#result_main_div" onclick="displayResults()" role="tab" aria-controls="pills-results" aria-selected="true">Results</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="pills-profile-wish_list" data-toggle="pill" href="#wish_main_div" role="tab"  onclick="displayWishList()" aria-controls="pills-wish_list" aria-selected="false">Wish List</a>
+        </li>
+      </ul>
+    </div>
+
+    <div id="result_main_div" class="tab-content tab-pane fade show active "  role="tabpanel" aria-labelledby="pills-home-tab">
+
+      <div id='result_div'>
+        <button type='button' id='display_forward_button_result' class='btn ml-auto  btn-light' onclick='showResultDetails()' style='display:none' disabled><i class='material-icons md-10'>arrow_forward_ios</i><span
+            class='align-middle float-left'>Detail</span></button>
+        <div class="mb-5 mt-4" id="results"></div>
+      </div>
+
+      <div id="product_details_div_result" class="mt-4">
+        <button type="button" id='display_backward_button_result' class="btn btn-default ml-4  btn-light" onclick="showSearchResults()" style='display:none'><i class="material-icons md-10">arrow_back_ios</i>List</button>
+        <div id="product_details_div_result_display" class="mt-4">
+        </div>
+      </div>
+
+    </div>
+
+    <div id="wish_main_div" class="tab-content tab-pane fade" role="tabpanel" aria-labelledby="pills-profile-tab">
+
+      <div id='wish_list_div'>
+        <button type='button' id='display_forward_button_wish' class='btn ml-auto  btn-light' onclick='showWishListDetails()' style='display:none' disabled><i class='material-icons md-10'>arrow_forward_ios</i><span
+                class='align-middle float-left'>Detail</span></button>
+        <div class="mb-5 mt-4" id="wish_lists"></div>
+      </div>
+
+      <div id="product_details_div_wish" class="mt-4">
+        <button type="button" id='display_backward_button_wish' class="btn btn-default ml-4  btn-light" onclick="showWishList()" style='display:none'><i class="material-icons md-10">arrow_back_ios</i>List</button>
+        <div id="product_details_div_wish_display" class="mt-4">
+        </div>
+      </div>
+
+    </div>
+</body>
+
+</html>
