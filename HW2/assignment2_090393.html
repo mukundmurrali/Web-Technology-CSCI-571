@@ -1,0 +1,142 @@
+﻿<html>
+<head>
+<style>
+.center {
+ padding-left:30%;
+ padding-right:30%;
+ text-align:center
+}
+.table tr td {
+	font-size:7%;
+}
+</style>
+</head>
+<body>
+<script type="text/javascript">
+
+function viewJSON(what) {
+    var URL = what.valueId.value;
+    if(URL == "") {
+        alert("Input is empty. Please enter valid file name.");
+        return false;
+    }
+	var canGenerate = false;
+    function loadJSON(url) {
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", url, false); // "synchronous"
+		try {
+			xmlhttp.send();
+		} catch (e) {
+		}
+		if(xmlhttp.status == 404) {
+			alert("File " + URL + " does not exist");
+		} else {
+			jsonDoc=xmlhttp.responseText;
+			if(jsonDoc === "") {
+				alert("File " + URL + " is empty");
+			} else {
+				try {
+					jsonObj = JSON.parse(jsonDoc);
+				} catch(e) {
+					alert("Parsing error for file " + URL);
+					return false;
+				}
+				canGenerate = true;
+				return jsonObj;
+			}
+		}
+    }
+    jsonObj = loadJSON(URL);
+    if(canGenerate && generateHTML(jsonObj)) {
+		hWin = window.open("about:blank", "Assignment4", "height=1100,width=1050");
+		hWin.document.write(html_text);
+		hWin.document.close();
+	}
+	return false;
+}
+
+function generateHTML(jsonObj) {
+    root = jsonObj.DocumentElement;
+    html_text = "<html><head><title>Highest-grossing film</title></head><body>";
+    html_text += "<table border='2'>";
+	header_keys = jsonObj.Mainline.Table.Header.Data;
+    html_text += "<tbody>";
+    html_text += "<tr>";
+    x = 0;
+    y = 0;
+    // output the headers
+    /*for (i = 0; i < header_keys.length; i++) {
+        header = header_keys[i];
+        html_text += "<th>" + header + "</th>";
+    }*/
+    html_text += "<th width='50'>" + header_keys[0] + "</th>";
+    html_text += "<th width='20'>" + header_keys[1] + "</th>";
+    html_text += "<th width='248'>" + header_keys[2] + "</th>";
+    html_text += "<th width='100'>" + header_keys[3] + "</th>";
+    html_text += "<th width='450'>" + header_keys[4] + "</th>";
+    html_text += "<th width='100'>" + header_keys[5] + "</th>";
+    html_text += "</tr>";
+	
+	if(!jsonObj.Mainline.Table.hasOwnProperty('Row')) {
+	 alert("JSON file contains no film entries");
+	 return false;
+	} else {
+		filmArray = jsonObj.Mainline.Table.Row;
+		// output out the values
+		for (i = 0; i < filmArray.length; i++) //do for all filmArray (one per row)
+		{
+			filmNodeList = filmArray[i]; //get properties of a plane (an object)
+			html_text += "<tr>"; //start a new row of the output table
+			var film_keys = Object.keys(filmNodeList);
+			for (j = 0; j < film_keys.length; j++) {
+				prop = film_keys[j];
+				if (film_keys[j] == "Logo") { //handle images separately
+					html_text += "<td><img height ='180px' width = '120px' src='" + filmNodeList[prop] + "'></td>";
+				} else if(film_keys[j] == "HomePage") {
+					html_text += "<td><a href = '" + filmNodeList[prop] +  "'>" + filmNodeList[prop] + "</a></td>";
+				} else if(film_keys[j] == "Hubs") {
+					html_text += "<td>";
+					hubs = filmNodeList[prop].Hub;
+					if(hubs.length > 0 ) {
+						html_text += "<ul>";
+					}
+					for (k =  0; k < hubs.length; k++) {
+						if(k == 0) {
+							html_text += "<b>";
+						}
+						html_text += "<li>" + hubs[k];
+						if(k == 0) {
+							html_text += "</b>";
+						}
+					}
+					if(hubs.length > 0) {
+						html_text +="</ul></td>";
+					}
+					html_text +="</td>";
+				} else {
+					html_text += "<td>" + filmNodeList[prop] + "</td>";
+				}
+			}
+			html_text += "</tr>";
+		}
+		html_text += "</tbody>";
+		html_text += "</table>";
+		html_text += "</body></html>";
+		html_text += "</body></html>";
+	}
+	return true;
+}
+
+</script>
+<div class="center">
+<div style = "padding-top:15%"> <b> Enter URL for Highest-grossing films List JSON File </div>
+<form style = "padding-top:3%;">
+<input type = "text" style="width: 130px;" id="valueId" >
+<div style = "padding-top:3%;">
+<input type = "submit" value = "Submit Query" style="padding: 3px 3px;" onclick="return viewJSON(this.form)">
+</div>
+<p id = "demo"> </p>
+</form>
+</div>
+</body>
+</html>
