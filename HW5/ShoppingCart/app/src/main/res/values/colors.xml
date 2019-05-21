@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200ee</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#d699ff</color>
+    <color name="cartOrange">#fc5830</color>
+    <color name="priceTextColor">#7737d5</color>
+    <color name="colorSecondary">#000000</color>
+    <color name="backgroundGray">#fafafa</color>
+    <color name="colorFade">#c0c0c0</color>
+    <color name="white">#ffffff</color>
+    <color name="red">#ff0000</color>
+    <color name="crimson">#DC143C</color>
+</resources>

@@ -1,0 +1,7 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="recycler_view_spacing">5dp</dimen>
+
+    <dimen name="product_title">20sp</dimen>
+    <dimen name="product_subtitle">15sp</dimen>
+</resources>

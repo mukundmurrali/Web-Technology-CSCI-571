@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/backgroundGray">
+    <LinearLayout
+        android:id="@+id/linearlayout_noresults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="No results"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearlayout_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp">
+        <ProgressBar
+            android:id="@+id/progressBar_searchProducts"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Searching products"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearlayout_resultcount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp">
+        <TextView
+            android:text="Showing "
+            android:layout_width="wrap_content"
+            android:textSize="17dp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/textview_resultcount"
+            android:textColor="#fc5830"
+            android:text="50 "
+            android:textStyle="bold"
+            android:textSize="17dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="results for "
+            android:layout_width="wrap_content"
+            android:textStyle="bold"
+            android:textSize="17dp"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/textview_resultkeyword"
+            android:textColor="#fc5830"
+            android:text="iphone"
+            android:textSize="17dp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <include layout="@layout/layout_recycler_view_results"/>
+</LinearLayout>
