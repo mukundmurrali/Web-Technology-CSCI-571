@@ -315,7 +315,7 @@ app.get('/getDetails', function (req, res) {
                     var productDetails = {"Photo" : pictureURL, "Title" : title, "Subtitle" : subtitle, "Price" : price, "Location" : location, "Return_Policy" : returnpolicy, "ItemSpecifics" : itemspecifics, "seller_tab" : sellerTab, "facebook_link": ViewItemURLForNaturalSearch};
 
                     var googleapicall = "https://www.googleapis.com/customsearch/v1?";
-                    googleapicall += "q=" + title + "&cx=015384499186900250807:s7je5h48oqc&imgSize=huge&imgType=news&num=8&searchType=image&key=AIzaSyDmHmget2qxh7ss2NyLOM5UF0mBB5pZ1RA";
+                    googleapicall += "q=" + title + "&cx={your_key}:s7je5h48oqc&imgSize=huge&imgType=news&num=8&searchType=image&key={your_key}";
 
                     //console.log("GOOGLE" + googleapicall);
 
