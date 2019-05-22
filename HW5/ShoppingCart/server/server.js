@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 
-var appId = "MukundMu-Webtech-PRD-b16e081a6-7cf4af77";
+var appId = "{your_key}";
 
 app.get('/searchResults', function (req, res) {
     try {
